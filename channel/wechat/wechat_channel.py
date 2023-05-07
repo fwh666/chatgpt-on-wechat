@@ -29,12 +29,46 @@ from plugins import *
 @itchat.msg_register([TEXT, VOICE, PICTURE, NOTE])
 def handler_single_msg(msg):
     try:
+        if checkUserPromise(msg) is None:
+            return None
         cmsg = WechatMessage(msg, False)
     except NotImplementedError as e:
         logger.debug("[WX]single message {} skipped: {}".format(msg["MsgId"], e))
         return None
+
     WechatChannel().handle_single(cmsg)
     return None
+
+
+def checkUserPromise(msg):
+    """
+    fwh
+            1. 用户在时间内-允许发送
+            2. 不再时间内-回复充值使用
+            3. 新用户对话-保存有效时间七天
+
+            1. 新用户首次登录-保存有效时间七天
+            2. 超过七天-直接返回充值消息
+            """
+    from_user_id = msg["FromUserName"]
+    from_nick_name = msg['User']['NickName']
+    now = datetime.datetime.now()
+    sessionData = selectUserBySessionId(from_user_id)
+    if sessionData is None or len(sessionData) == 0:
+        effective_time = now + datetime.timedelta(days=7)
+        insertUser(from_nick_name, from_user_id, from_user_id, from_nick_name, effective_time, now)
+    else:
+        effective_timestamp = datetime.datetime.strptime(sessionData, '%Y-%m-%d %H:%M:%S').timestamp()
+        now_timestamp = time.mktime(now.timetuple())
+        if effective_timestamp < now_timestamp:
+            # 回复自定义消息
+            # from bridge import reply
+            itchat.send("您的余额已不足，请充值后继续使用哈……", toUserName=from_user_id)
+            logger.info("UserId: %s ,NickName:%s ,已失效", from_user_id, from_nick_name)
+            return None
+        elif effective_timestamp > now_timestamp:
+            print("再有效期内")
+            return msg
 
 
 @itchat.msg_register([TEXT, VOICE, PICTURE, NOTE], isGroupChat=True)
