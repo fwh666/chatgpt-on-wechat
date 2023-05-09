@@ -77,6 +77,34 @@ def selectUserBySessionId(sessionId):
         pass
 
 
+# 根据昵称查询-可能会出现多个
+def selectUserByNickName(nickname):
+    try:
+        cursor = db.cursor()
+        sql = "select effective_time from fwh_user where nickname ='%s'" % nickname.__str__()
+        cursor.execute(sql)
+        # myresult = cursor.fetchone()
+        myresult = cursor.fetchall()
+        # 将时间字符串转换为datetime类型
+        if myresult is not None:
+            # 将查询结果放入集合
+            data_set = set()
+            for result in myresult:
+                # effective_time = result.strftime('%Y-%m-%d %H:%M:%S')
+                effective_time = str(result[0])
+                data_set.add(effective_time)
+            # effective_time = myresult[0].strftime('%Y-%m-%d %H:%M:%S')
+            return data_set
+        cursor.close()
+        # db.close()
+        return myresult
+        # return data
+
+    except Exception as e:
+        logger.error("查询错误", e)
+        pass
+
+
 # 查询方法
 def seleteUser():
     # 使用cursor方法创建一个游标
@@ -119,9 +147,13 @@ def insertUser(username, password, sessionID, nickname, effective_time, created_
 if __name__ == '__main__':
     # 查询
     # data = selectUserBySessionId('@1aa2b6f04a71fb7ff5fa353454b0f3a992f0d769fd1f94b49086d1eacc64c583')
-    data = selectUserBySessionId('@4a7bf74e47e7e8a431de8676ea49a98a')
+    # data = selectUserBySessionId('@4a7bf74e47e7e8a431de8676ea49a98a')
     # data = selectUserById(1)
     # data = seleteUser()
+    data = selectUserByNickName("AI-Chat")
+    print(len(data))
+    # print(len(list(data)))
+    print(data)
 
     # 新增
     # now = datetime.datetime.now()
