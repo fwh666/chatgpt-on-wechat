@@ -59,6 +59,7 @@ def checkUserPromise(msg):
     if sessionData is None or len(sessionData) == 0:
         effective_time = now + datetime.timedelta(days=7)
         insertUser(from_nick_name, from_user_id, from_user_id, from_nick_name, effective_time, now)
+        return msg
     else:
         effective_timestamp = datetime.datetime.strptime(sessionData, '%Y-%m-%d %H:%M:%S').timestamp()
         now_timestamp = time.mktime(now.timetuple())
