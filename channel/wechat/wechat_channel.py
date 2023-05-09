@@ -9,6 +9,7 @@ import json
 import os
 import threading
 import time
+import datetime
 
 import requests
 
@@ -23,6 +24,7 @@ from common.time_check import time_checker
 from config import conf, get_appdata_dir
 from lib import itchat
 from lib.itchat.content import *
+from mysql import selectUserBySessionId, selectUserByNickName, insertUser
 from plugins import *
 
 
@@ -63,11 +65,20 @@ def checkUserPromise(msg):
         if effective_timestamp < now_timestamp:
             # 回复自定义消息
             # from bridge import reply
-            itchat.send("您的余额已不足，请充值后继续使用哈……", toUserName=from_user_id)
+            # itchat.send("您的赞赏是我创作的动力和支持！赞赏后可继续使用，让我们一起成就更多！！", toUserName=from_user_id)
+            itchat.send("感谢您的使用，我是您的机器人小助手萌萌比卡。如果您觉得我的服务对您有帮助，不妨考虑赞赏我一下呢！赞赏后，您可以继续享受我的服务，并且我也会更有动力为您提供更好的帮助。谢谢您的支持！！", toUserName=from_user_id)
+            # 发送微信赞赏码
+            img_url = "https://leanoss.fuwenhao.club/IJWU5m4PH8fRAeMJX9zjpfn6qDwJPqdI/zanshagnma.png"
+            pic_res = requests.get(img_url, stream=True)
+            image_storage = io.BytesIO()
+            for block in pic_res.iter_content(1024):
+                image_storage.write(block)
+            image_storage.seek(0)
+            itchat.send_image(image_storage, toUserName=from_user_id)
             logger.info("UserId: %s ,NickName:%s ,已失效", from_user_id, from_nick_name)
             return None
         elif effective_timestamp > now_timestamp:
-            print("再有效期内")
+            logger.info("UserId: %s ,NickName:%s ,再有效期内，截止到：%s", from_user_id, from_nick_name, sessionData)
             return msg
 
 
