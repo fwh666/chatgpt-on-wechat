@@ -31,6 +31,8 @@ from plugins import *
 @itchat.msg_register([TEXT, VOICE, PICTURE, NOTE])
 def handler_single_msg(msg):
     try:
+        # 赞赏行为确认：
+        checkZanShang(msg)
         if checkUserPromise(msg) is None:
             return None
         cmsg = WechatMessage(msg, False)
@@ -40,6 +42,15 @@ def handler_single_msg(msg):
 
     WechatChannel().handle_single(cmsg)
     return None
+
+
+#
+# @itchat.msg_register('NOTE', isFriendChat=True)
+def checkZanShang(msg):
+    if 'NOTE' in msg['Type']:
+        if '打赏' in msg['Content']:
+            # 处理赞赏消息
+            print('收到一条赞赏消息：', msg['Content'])
 
 
 def checkUserPromise(msg):
@@ -55,7 +66,6 @@ def checkUserPromise(msg):
     from_user_id = msg["FromUserName"]
     from_nick_name = msg['User']['NickName']
     from_signature = msg['User']['Signature']
-
 
     # 根据用户名+签名确认唯一 确认用户ID
     sessionData = selectUserByNicknameSignNature(from_nick_name, from_signature)
@@ -74,7 +84,8 @@ def checkUserPromise(msg):
             # from bridge import reply
             # itchat.send("您的赞赏是我创作的动力和支持！赞赏后可继续使用，让我们一起成就更多！！", toUserName=from_user_id)
             itchat.send(
-                "嘿，{} 我是您的助手萌萌比卡[太阳][太阳]\r\n如果您觉得我的服务对您有帮助，能不能给我一点小小的赞赏呢？[爱心][爱心]\r\n赞赏后，您可以继续享受我的服务。[庆祝][庆祝]\r\n谢谢您的支持[玫瑰][玫瑰]".format(from_nick_name),
+                "嘿，{} 我是您的助手萌萌比卡[太阳][太阳]\r\n如果您觉得我的服务对您有帮助，能不能给我一点小小的赞赏呢？[爱心][爱心]\r\n赞赏后，您可以继续享受我的服务。[庆祝][庆祝]\r\n谢谢您的支持[玫瑰][玫瑰]".format(
+                    from_nick_name),
                 toUserName=from_user_id)
             # 发送微信赞赏码
             img_url = "https://leanoss.fuwenhao.club/IJWU5m4PH8fRAeMJX9zjpfn6qDwJPqdI/zanshagnma.png"
@@ -89,6 +100,7 @@ def checkUserPromise(msg):
         elif effective_timestamp > now_timestamp:
             logger.info("UserId: %s ,NickName:%s ,再有效期内，截止到：%s", from_user_id, from_nick_name, sessionData)
             return msg
+
 
 def saveFriend(friend):
     logger.info("用户信息为:%s", friend)
@@ -109,7 +121,7 @@ def saveFriend(friend):
     effective_time = now + datetime.timedelta(days=7)
     try:
         insertUser(UserName, NickName, RemarkName, Sex, Province, City, datetime.datetime.now(),
-                   HeadImgUrl, ContactFlag, AttrStatus, SnsFlag, Signature,effective_time)
+                   HeadImgUrl, ContactFlag, AttrStatus, SnsFlag, Signature, effective_time)
     except Exception as e:
         logger.error("保存好友异常,NickName为:{}", NickName, e)
         pass
