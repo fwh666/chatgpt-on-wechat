@@ -27,7 +27,8 @@ import pymysql
 import datetime
 
 # 打开数据库连接
-db = pymysql.connect(host='43.138.30.198', port=3306, user='wechat_test', passwd='ettXnfN8MTXS7SKE', db='wechat_test',
+db = pymysql.connect(host='127.0.0.1', port=3306, user='root', passwd='123456', db='fwh',
+                     # db = pymysql.connect(host='43.138.30.198', port=3306, user='wechat_test', passwd='ettXnfN8MTXS7SKE', db='wechat_test',
                      # db = pymysql.connect(host='127.0.0.1', port=3306, user='wechat_test', passwd='123456', db='wechat_test',
                      charset='utf8mb4')
 
@@ -50,6 +51,32 @@ def selectUserById(id):
     cursor.close()
     db.close()
     return data
+
+
+def selectUserByNicknameSignNature(nickName, signNature):
+    # 使用cursor方法创建一个游标
+    cursor = db.cursor()
+    sql = "select effective_time from fwh_wechat_friends where nickname ='{}' and signature= '{}'".format(str(nickName),
+                                                                                                          str(signNature))
+    # 开启事务
+    cursor.execute('start transaction')
+
+    # 查询数据
+    cursor.execute(sql)
+    # 获取查询结果
+    myresult = cursor.fetchall()
+    # 将时间字符串转换为datetime类型
+    if myresult is not None and len(myresult) > 0:
+        if isinstance(myresult[0][0], datetime.datetime):
+            effective_time = myresult[0][0].strftime('%Y-%m-%d %H:%M:%S')
+    else:
+        effective_time = ""
+    cursor.close()
+
+    # 提交事务
+    db.commit()
+    # db.close()
+    return effective_time
 
 
 def selectUserBySessionId(sessionId):
@@ -144,15 +171,36 @@ def insertUser(username, password, sessionID, nickname, effective_time, created_
     # db.close()
 
 
+def insertUser(username, nickname, remarkname, sex, province, city, create_time, HeadImgUrl, ContactFlag, AttrStatus,
+               SnsFlag, signature, effective_time):
+    # 使用cursor方法创建一个游标
+    cursor = db.cursor()
+    sql = "insert into fwh_wechat_friends(username,nickname,remarkname,sex,province,city,create_time,headImgurl,contactflag,attrstatus,snsflag,signature,effective_time) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) "
+    try:
+        # 执行sql语句;使用构造参数防止sql注入!
+        row = cursor.execute(sql, (
+            username, nickname, remarkname, sex, province, city, create_time, HeadImgUrl, ContactFlag, AttrStatus,
+            SnsFlag,
+            signature, effective_time))
+        logger.info("插入条数:%s" % row)
+        # 提交到数据库执行
+        db.commit()
+    except Exception as e:
+        logger.error("插入异常", e)
+        # 发生错误时回滚
+        db.rollback()
+    # 关闭
+    cursor.close()
+    # db.close()
+
+
 if __name__ == '__main__':
     # 查询
-    # data = selectUserBySessionId('@1aa2b6f04a71fb7ff5fa353454b0f3a992f0d769fd1f94b49086d1eacc64c583')
     # data = selectUserBySessionId('@4a7bf74e47e7e8a431de8676ea49a98a')
     # data = selectUserById(1)
     # data = seleteUser()
     data = selectUserByNickName("AI-Chat")
     print(len(data))
-    # print(len(list(data)))
     print(data)
 
     # 新增

@@ -24,7 +24,7 @@ from common.time_check import time_checker
 from config import conf, get_appdata_dir
 from lib import itchat
 from lib.itchat.content import *
-from mysql import selectUserBySessionId, insertUser
+from mysql import selectUserBySessionId, insertUser, selectUserByNicknameSignNature
 from plugins import *
 
 
@@ -54,20 +54,28 @@ def checkUserPromise(msg):
             """
     from_user_id = msg["FromUserName"]
     from_nick_name = msg['User']['NickName']
-    now = datetime.datetime.now()
-    sessionData = selectUserBySessionId(from_user_id)
+    from_signature = msg['User']['Signature']
+
+
+    # 根据用户名+签名确认唯一 确认用户ID
+    sessionData = selectUserByNicknameSignNature(from_nick_name, from_signature)
+    # sessionData = selectUserBySessionId(from_user_id)
     if sessionData is None or len(sessionData) == 0:
-        effective_time = now + datetime.timedelta(days=7)
-        insertUser(from_nick_name, from_user_id, from_user_id, from_nick_name, effective_time, now)
+        saveFriend(msg)
+        # effective_time = now + datetime.timedelta(days=7)
+        # insertUser(from_nick_name, from_user_id, from_user_id, from_nick_name, effective_time, now)
         return msg
     else:
+        now = datetime.datetime.now()
         effective_timestamp = datetime.datetime.strptime(sessionData, '%Y-%m-%d %H:%M:%S').timestamp()
         now_timestamp = time.mktime(now.timetuple())
         if effective_timestamp < now_timestamp:
             # 回复自定义消息
             # from bridge import reply
             # itchat.send("您的赞赏是我创作的动力和支持！赞赏后可继续使用，让我们一起成就更多！！", toUserName=from_user_id)
-            itchat.send("感谢您的使用，我是您的机器人小助手萌萌比卡。如果您觉得我的服务对您有帮助，不妨考虑赞赏我一下呢！赞赏后，您可以继续享受我的服务，并且我也会更有动力为您提供更好的帮助。谢谢您的支持！！", toUserName=from_user_id)
+            itchat.send(
+                "嘿，{} 我是您的助手萌萌比卡[太阳][太阳]\r\n如果您觉得我的服务对您有帮助，能不能给我一点小小的赞赏呢？[爱心][爱心]\r\n赞赏后，您可以继续享受我的服务。[庆祝][庆祝]\r\n谢谢您的支持[玫瑰][玫瑰]".format(from_nick_name),
+                toUserName=from_user_id)
             # 发送微信赞赏码
             img_url = "https://leanoss.fuwenhao.club/IJWU5m4PH8fRAeMJX9zjpfn6qDwJPqdI/zanshagnma.png"
             pic_res = requests.get(img_url, stream=True)
@@ -81,6 +89,30 @@ def checkUserPromise(msg):
         elif effective_timestamp > now_timestamp:
             logger.info("UserId: %s ,NickName:%s ,再有效期内，截止到：%s", from_user_id, from_nick_name, sessionData)
             return msg
+
+def saveFriend(friend):
+    logger.info("用户信息为:%s", friend)
+    UserName = friend['User']['UserName']
+    NickName = friend['User']['NickName']
+    RemarkName = friend['User']['RemarkName']
+    Sex = friend['User']['Sex']
+    Province = friend['User']['Province']
+    City = friend['User']['City']
+    HeadImgUrl = friend['User']['HeadImgUrl']
+    ContactFlag = friend['User']['ContactFlag']
+    AttrStatus = friend['User']['AttrStatus']
+    SnsFlag = friend['User']['SnsFlag']
+    Signature = friend['User']['Signature']
+    Uin = friend['User']['Uin']
+    print(Uin)
+    now = datetime.datetime.now()
+    effective_time = now + datetime.timedelta(days=7)
+    try:
+        insertUser(UserName, NickName, RemarkName, Sex, Province, City, datetime.datetime.now(),
+                   HeadImgUrl, ContactFlag, AttrStatus, SnsFlag, Signature,effective_time)
+    except Exception as e:
+        logger.error("保存好友异常,NickName为:{}", NickName, e)
+        pass
 
 
 @itchat.msg_register([TEXT, VOICE, PICTURE, NOTE], isGroupChat=True)
@@ -157,7 +189,8 @@ class WechatChannel(ChatChannel):
     def startup(self):
         itchat.instance.receivingRetryCount = 600  # 修改断线超时时间
         # login by scan QRCode
-        hotReload = conf().get("hot_reload", False)
+        # hotReload = conf().get("hot_reload", False)
+        hotReload = conf().get("hot_reload", True)
         status_path = os.path.join(get_appdata_dir(), "itchat.pkl")
         itchat.auto_login(
             enableCmdQR=2,
