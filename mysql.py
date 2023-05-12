@@ -25,12 +25,42 @@ def cursor():
 from common.log import logger
 import pymysql
 import datetime
+from dbutils.pooled_db import PooledDB
 
 # 打开数据库连接
-db = pymysql.connect(host='127.0.0.1', port=3306, user='root', passwd='123456', db='fwh',
-                     # db = pymysql.connect(host='43.138.30.198', port=3306, user='wechat_test', passwd='ettXnfN8MTXS7SKE', db='wechat_test',
-                     # db = pymysql.connect(host='127.0.0.1', port=3306, user='wechat_test', passwd='123456', db='wechat_test',
-                     charset='utf8mb4')
+# db = pymysql.connect(host='127.0.0.1', port=3306, user='root', passwd='123456', db='fwh',
+#                      # db = pymysql.connect(host='43.138.30.198', port=3306, user='wechat_test', passwd='ettXnfN8MTXS7SKE', db='wechat_test',
+#                      # db = pymysql.connect(host='127.0.0.1', port=3306, user='wechat_test', passwd='123456', db='wechat_test',
+#                      charset='utf8mb4')
+
+pool = PooledDB(
+    creator=pymysql,
+    maxconnections=5,
+    mincached=2,
+    maxcached=5,
+    maxshared=3,
+    blocking=True,
+    maxusage=None,
+    setsession=[],
+    ping=0,
+    host='127.0.0.1',
+    port=3306,
+    user='root',
+    password='123456',
+    database='fwh',
+    charset='utf8mb4'
+)
+# def query_data(sql):
+#     conn = pool.connection()
+#     cursor = conn.cursor()
+#     cursor.execute(sql)
+#     data = cursor.fetchall()
+#     cursor.close()
+#     conn.close()
+#     return data
+
+# 从连接池中获取连接
+db = pool.connection()
 
 
 # 查询方法
