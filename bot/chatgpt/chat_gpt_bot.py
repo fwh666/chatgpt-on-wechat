@@ -42,7 +42,7 @@ class ChatGPTBot(Bot, OpenAIImage):
             "request_timeout": conf().get("request_timeout", None),  # 请求超时时间，openai接口默认设置为600，对于难问题一般需要较长时间
             "timeout": conf().get("request_timeout", None),  # 重试超时时间，在这个时间内，将会自动重试
         }
-
+    # todo-fwh-查询内容
     def reply(self, query, context=None):
         # acquire reply content
         if context.type == ContextType.TEXT:

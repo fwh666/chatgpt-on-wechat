@@ -47,7 +47,7 @@ class WechatMessage(ChatMessage):
 
         self.from_user_id = itchat_msg["FromUserName"]
         self.to_user_id = itchat_msg["ToUserName"]
-
+        # todo-fwh-对话用户信息校验
         user_id = itchat.instance.storageClass.userName
         nickname = itchat.instance.storageClass.nickName
 

@@ -302,6 +302,7 @@ class ChatChannel(Channel):
             with self.lock:
                 session_ids = list(self.sessions.keys())
                 for session_id in session_ids:
+                    # todo-fwh-session_id唯一的用户ID 用户存储
                     context_queue, semaphore = self.sessions[session_id]
                     if semaphore.acquire(blocking=False):  # 等线程处理完毕才能删除
                         if not context_queue.empty():

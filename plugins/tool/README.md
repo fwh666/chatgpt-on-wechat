@@ -34,7 +34,7 @@ $tool reset: 重置工具。
 
 > terminal调优记录：https://github.com/zhayujie/chatgpt-on-wechat/issues/776#issue-1659347640
 
-### 4. meteo-weather
+### 4. meteo-weather    $tool meteo-weather
 ###### 回答你有关天气的询问, 需要获取时间、地点上下文信息，本工具使用了[meteo open api](https://open-meteo.com/)
 注：该工具需要较高的对话技巧，不保证你问的任何问题均能得到满意的回复
 
