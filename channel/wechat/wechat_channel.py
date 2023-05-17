@@ -26,6 +26,7 @@ from lib import itchat
 from lib.itchat.content import *
 from mysql import selectUserBySessionId, insertUser, selectUserByNicknameSignNature
 from plugins import *
+from redisTool import getEffectTime, setEffectTime
 
 
 @itchat.msg_register([TEXT, VOICE, PICTURE, NOTE])
@@ -68,7 +69,14 @@ def checkUserPromise(msg):
     from_signature = msg['User']['Signature']
 
     # 根据用户名+签名确认唯一 确认用户ID
-    sessionData = selectUserByNicknameSignNature(from_nick_name, from_signature)
+    sessionData = getEffectTime(from_nick_name + "_" + from_signature)
+    if sessionData is None:
+        sessionData = selectUserByNicknameSignNature(from_nick_name, from_signature)
+        if sessionData is None or len(sessionData) == 0:
+            print("查不到")
+        else:
+            setEffectTime(from_nick_name + "_" + from_signature, sessionData)
+    # sessionData = selectUserByNicknameSignNature(from_nick_name, from_signature)
     # sessionData = selectUserBySessionId(from_user_id)
     if sessionData is None or len(sessionData) == 0:
         saveFriend(msg)
@@ -77,6 +85,8 @@ def checkUserPromise(msg):
         return msg
     else:
         now = datetime.datetime.now()
+        if isinstance(sessionData, bytes):
+            sessionData = sessionData.decode('utf-8')
         effective_timestamp = datetime.datetime.strptime(sessionData, '%Y-%m-%d %H:%M:%S').timestamp()
         now_timestamp = time.mktime(now.timetuple())
         if effective_timestamp < now_timestamp:
