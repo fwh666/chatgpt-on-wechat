@@ -9,7 +9,6 @@ import json
 import os
 import threading
 import time
-
 import requests
 
 from bridge.context import *
@@ -25,7 +24,19 @@ from lib import itchat
 from lib.itchat.content import *
 
 
-@itchat.msg_register([TEXT, VOICE, PICTURE, NOTE])
+@itchat.msg_register('NOTE', isFriendChat=True)
+def handle_reward_msg(msg):
+    print(msg['Type'])
+    if '打赏' in msg['Content']:
+        # 解析赞赏消息，获取赞赏金额和赞赏者信息
+        reward_info = msg['Content'].split('\n')
+        reward_amount = reward_info[-3]
+        reward_from = reward_info[-2].replace('赞赏人：', '')
+        print('收到一笔来自{}的赞赏，金额为{}元'.format(reward_from, reward_amount))
+
+
+# @itchat.msg_register([TEXT, VOICE, PICTURE, NOTE])
+@itchat.msg_register([TEXT, VOICE, PICTURE, NOTE, MAP, CARD, SHARING, RECORDING, ATTACHMENT, VIDEO, FRIENDS, SYSTEM])
 def handler_single_msg(msg):
     try:
         cmsg = WechatMessage(msg, False)

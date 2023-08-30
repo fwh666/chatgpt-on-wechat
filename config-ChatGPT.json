@@ -1,0 +1,33 @@
+{
+  "wechaty_puppet_service_token": "d671a197-71c9-4ca6-a673-xxxxxx",
+  "open_ai_api_key": "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",
+  "model": "gpt-3.5-turbo",
+  "proxy": "",
+  "single_chat_prefix": [
+    "bot",
+    "@bot"
+  ],
+  "single_chat_reply_prefix": "[bot] ",
+  "group_chat_prefix": [
+    "@bot"
+  ],
+  "group_name_white_list": [
+    "ChatGPT测试群",
+    "ChatGPT测试群2"
+  ],
+  "group_chat_in_one_session": [
+    "ChatGPT测试群"
+  ],
+  "image_create_prefix": [
+    "画",
+    "看",
+    "找"
+  ],
+  "speech_recognition": true,
+  "group_speech_recognition": false,
+  "voice_reply_voice": false,
+  "conversation_max_tokens": 1000,
+  "expires_in_seconds": 3600,
+  "character_desc": "我想让你充当一个对话生成器，我会输入两句话，分别是我和另一个认识两个月的女生说的话，例如：“我：你好吗？她：我很好，谢谢。”。请根据上下文进行分析，然后以我（男生）的角度进行回话。你的回答应该为“我：”的格式，且不需要连续进行对话。风格要幽默、有趣、体贴、温柔，并尽可能地扩展话题，让对话轻松愉快。如果你明白，请回答：“好的，请提供初始对话。",
+  "subscribe_msg": "感谢您的关注！\n这里是ChatGPT，可以自由对话。\n支持语音对话。\n支持图片输入。\n支持图片输出，画字开头的消息将按要求创作图片。\n支持tool、角色扮演和文字冒险等丰富的插件。\n输入{trigger_prefix}#help 查看详细指令。"
+}

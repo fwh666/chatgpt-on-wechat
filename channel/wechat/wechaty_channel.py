@@ -34,11 +34,14 @@ class WechatyChannel(ChatChannel):
 
     def __init__(self):
         super().__init__()
-
+    #参考获取: https://github.com/zhayujie/chatgpt-on-wechat/pull/244
     def startup(self):
         config = conf()
         token = config.get("wechaty_puppet_service_token")
-        os.environ["WECHATY_PUPPET_SERVICE_TOKEN"] = token
+        # 生成环境配置
+        # os.environ["WECHATY_PUPPET_SERVICE_TOKEN"] = token
+        # 本地环境配置
+        os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = "127.0.0.1:9001"
         asyncio.run(self.main())
 
     async def main(self):
@@ -53,7 +56,7 @@ class WechatyChannel(ChatChannel):
     async def on_login(self, contact: Contact):
         self.user_id = contact.contact_id
         self.name = contact.name
-        logger.info("[WX] login user={}".format(contact))
+        logger.info("[WXY] login user={}".format(contact))
 
     # 统一的发送函数，每个Channel自行实现，根据reply的type字段发送不同类型的消息
     def send(self, reply: Reply, context: Context):
